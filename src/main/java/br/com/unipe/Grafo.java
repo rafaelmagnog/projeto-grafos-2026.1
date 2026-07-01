@@ -10,41 +10,41 @@ public class Grafo {
     private int ordem;
     private int tamanho;
     private final boolean ePonderado;
-
+    
     public Grafo() {
         this(false, false);
     }
-
+    
     public Grafo(boolean eDirigido, boolean ePonderado) {
         this.eDirigido = eDirigido;
         this.ePonderado = ePonderado;
         arestas = new ArrayList<>();
         vertices = new ArrayList<>();
     }
-
+    
     public void adicionaVertices(String... nomes) {
         for (String nome : nomes) {
             vertices.add(new Vertice(nome));
             ordem++;
         }
     }
-
+    
     public void addAresta(String v1, String v2) {
         arestas.add(criaAresta("", v1, v2, null));
     }
-
+    
     public void addAresta(String v1, String v2, int peso) {
         arestas.add(criaAresta("", v1, v2, peso));
     }
-
+    
     public void addAresta(String nome, String v1, String v2) {
         arestas.add(criaAresta(nome, v1, v2, null));
     }
-
+    
     public void addAresta(String nome, String v1, String v2, int peso) {
         arestas.add(criaAresta(nome, v1, v2, peso));
     }
-
+    
     private Aresta criaAresta(String nomeAresta, String nomeVertice1, String nomeVertice2, Integer peso) {
         Vertice v1 = encontraVertice(nomeVertice1).orElseThrow(
                 () -> new IllegalArgumentException("Vertice " + nomeVertice1 + " não encontrado."));
@@ -58,7 +58,7 @@ public class Grafo {
         tamanho++;
         return new Aresta(nomeAresta, v1, v2, peso);
     }
-
+    
     private void resolveAdjacencias(Vertice v1, Vertice v2) {
         v1.adicionaAdjacencia(v2); // v1 envia p v2
         v2.adicionaAdjacente(v1); // v2 recebe de v1
@@ -67,7 +67,7 @@ public class Grafo {
             v2.adicionaAdjacencia(v1);
         }
     }
-
+    
     private void aumentaGrauDosVertices(Vertice v1, Vertice v2) {
         if (eDirigido) {
             v1.aumentaOutDegree();
@@ -77,7 +77,7 @@ public class Grafo {
             v2.aumentaGrau();
         }
     }
-
+    
     private void infereSeGrafoEDirecionado(Vertice v1, Vertice v2) {
         if (eSelfLoop(v1, v2)) {
             reprocessamentoParaDigrafo();
@@ -90,19 +90,19 @@ public class Grafo {
             }
         }
     }
-
+    
     private static boolean eArestaDuplicada(Vertice v1, Vertice v2, Aresta aresta) {
         return aresta.getVerticeOrigem().equals(v1) && aresta.getVerticeDestino().equals(v2);
     }
-
+    
     private static boolean eViaMaoDupla(Vertice v1, Vertice v2, Aresta aresta) {
         return aresta.getVerticeOrigem().equals(v2) && aresta.getVerticeDestino().equals(v1);
     }
-
+    
     private static boolean eSelfLoop(Vertice v1, Vertice v2) {
         return v1.getNome().equals(v2.getNome());
     }
-
+    
     public Optional<Vertice> encontraVertice(String nome) {
         for (Vertice vertice : vertices) {
             if (vertice.getNome().equalsIgnoreCase(nome)) {
@@ -111,14 +111,14 @@ public class Grafo {
         }
         return Optional.empty();
     }
-
+    
     private void reprocessamentoParaDigrafo() {
         eDirigido = true;
         System.out.println("Reprocessamento para digrafo necessário. O grafo agora é direcionado.");
         limpezaGrausEAdjacencias();
         recalculaGrausEAdjacencias();
     }
-
+    
     private void recalculaGrausEAdjacencias() {
         arestas.forEach(aresta -> {
             Vertice origem = aresta.getVerticeOrigem();
@@ -127,14 +127,14 @@ public class Grafo {
             resolveAdjacencias(origem, destino);
         });
     }
-
+    
     private void limpezaGrausEAdjacencias() {
         vertices.forEach(vertice -> {
             vertice.resetaGraus();
             vertice.resetaAdjacenciasEAdjacentes();
         });
     }
-
+    
     public String exibeGrausDosVertices() {
         StringBuilder graus = new StringBuilder();
         for (Vertice vertice : vertices) {
@@ -142,7 +142,7 @@ public class Grafo {
         }
         return graus.toString();
     }
-
+    
     public String exibeAdjacencias() {
         StringBuilder adjacencias = new StringBuilder();
         for (Vertice vertice : vertices) {
@@ -150,7 +150,7 @@ public class Grafo {
         }
         return adjacencias.toString();
     }
-
+    
     public String exibeAdjacentes() {
         StringBuilder adjacencias = new StringBuilder();
         for (Vertice vertice : vertices) {
@@ -158,15 +158,15 @@ public class Grafo {
         }
         return adjacencias.toString();
     }
-
+    
     public void exibeMatrizAdjacencia() {
         List<Vertice> verticesOrdenados = vertices.stream().sorted(Comparator.comparing(Vertice::getNome)).toList();
-
+        
         StringBuilder matriz = new StringBuilder("\nMatriz de Adjacência\n");
         matriz.append("\t");
         verticesOrdenados.forEach(v -> matriz.append(v.getNome()).append("\t"));
         matriz.append("\n");
-
+        
         for (Vertice vertice : verticesOrdenados) { // read-only
             matriz.append(vertice.getNome()).append("\t");
             List<Vertice> adjacencias = vertice.getAdjacencias();
@@ -175,10 +175,10 @@ public class Grafo {
             }
             matriz.append("\n");
         }
-
+        
         System.out.println(matriz);
     }
-
+    
     public void exibeMatrizIncidencia() {
         List<Vertice> verticesOrdenados = vertices.stream().sorted(Comparator.comparing(Vertice::getNome)).toList();
         StringBuilder matriz = new StringBuilder("\nMatriz de Incidência\n\t");
@@ -205,37 +205,37 @@ public class Grafo {
         }
         System.out.println(matriz);
     }
-
+    
     public List<String> dfsIterativo(String origem, String destino) {
         Vertice verticeOrigem = encontraVertice(origem).orElseThrow(
                 () -> new IllegalArgumentException("Vertice " + origem + " não encontrado."));
         Vertice verticeDestino = destino == null ? null
                 : encontraVertice(destino).orElseThrow(
-                        () -> new IllegalArgumentException("Vertice " + destino + " não encontrado."));
-
+                () -> new IllegalArgumentException("Vertice " + destino + " não encontrado."));
+        
         Stack<Vertice> pilha = new Stack<>();
         List<Vertice> visitados = new ArrayList<>();
         StringBuilder percurso = new StringBuilder("Percurso = ");
-
+        
         visitados.add(verticeOrigem);
         pilha.push(verticeOrigem);
-
+        
         percurso.append(verticeOrigem.getNome()).append(", ");
-
+        
         while (!pilha.isEmpty()) {
             Vertice atual = pilha.peek();
-
+            
             if (atual.equals(verticeDestino)) {
                 break;
             }
-
+            
             List<Vertice> adjacencias = atual.getAdjacencias();
             List<Vertice> adjacenciasOrdenadas = adjacencias.stream().sorted(Comparator.comparing(Vertice::getNome))
                     .toList();
-
+            
             // Pegue a primeira adjacência não visitada
             Optional<Vertice> proximo = adjacenciasOrdenadas.stream().filter(a -> !visitados.contains(a)).findFirst();
-
+            
             if (proximo.isPresent()) {
                 Vertice adjacencia = proximo.get();
                 visitados.add(adjacencia);
@@ -245,22 +245,22 @@ public class Grafo {
                 pilha.pop(); // vértice esgotado: remove da pilha
             }
         }
-
+        
         System.out.println(percurso);
         return visitados.stream().map(Vertice::getNome).toList();
     }
-
+    
     public List<String> dfsRecursivo(String origem, String destino, List<Vertice> visitados) {
         final List<Vertice> visitadosAtual = visitados != null ? visitados : new ArrayList<>();
-
+        
         Vertice v = encontraVertice(origem).orElseThrow(
                 () -> new IllegalArgumentException("Vertice " + origem + " não encontrado."));
         visitadosAtual.add(v);
-
+        
         if (origem.equals(destino)) {
             return visitadosAtual.stream().map(Vertice::getNome).toList();
         }
-
+        
         // itera os vizinhos um a um — após backtrack, os já visitados são pulados pelo
         // contains()
         // espelhando o peek() + findFirst() do iterativo
@@ -268,26 +268,26 @@ public class Grafo {
             if (visitadosAtual.contains(adj)) {
                 continue;
             }
-
+            
             dfsRecursivo(adj.getNome(), destino, visitadosAtual);
-
+            
             // se destino foi encontrado em algum ramo, propaga o resultado
             if (destino != null && visitadosAtual.stream().anyMatch(x -> x.getNome().equals(destino))) {
                 return visitadosAtual.stream().map(Vertice::getNome).toList();
             }
         }
-
+        
         // vértice esgotado (sem vizinhos não visitados): retorna o percurso até aqui
         return visitadosAtual.stream().map(Vertice::getNome).toList();
     }
-
+    
     public int encontraComprimentoCaminho(String... caminho) {
         if (!ePonderado) {
             return caminho.length - 1; // qtd de arestas percorridas
         }
         int comprimento = 0;
         List<Aresta> arestasPercorridas = new ArrayList<>();
-
+        
         for (int i = 0; i < caminho.length - 1; i++) {
             int indiceAtual = i;
             Vertice origem = encontraVertice(caminho[indiceAtual]).orElseThrow(
@@ -307,13 +307,13 @@ public class Grafo {
         }
         return comprimento;
     }
-
+    
     public boolean eConexo() {
         for (Vertice v : vertices)
             if (v.getInDegree() == 0 || v.getOutDegree() == 0) {
                 return false;
             }
-
+        
         for (Vertice v : vertices) {
             List<String> caminho = dfsIterativo(v.getNome(), null);
             if (caminho.size() < vertices.size()) {
@@ -322,27 +322,27 @@ public class Grafo {
         }
         return true;
     }
-
+    
     public boolean eConexoSimplificado() {
         if (vertices.stream().anyMatch(v -> v.getInDegree() == 0 || v.getOutDegree() == 0)) {
             return false;
         }
         return vertices.stream().noneMatch(v -> dfsIterativo(v.getNome(), null).size() < vertices.size());
     }
-
+    
     public List<String> greedySearch(String nomeVerticeOrigem, String nomeVerticeDestino) {
         List<Vertice> verticesVisitados = new ArrayList<>();
         int comprimentoCaminho = 0;
-
+        
         Vertice verticeOrigem = encontraVertice(nomeVerticeOrigem).orElseThrow();
         Vertice verticeDestino = encontraVertice(nomeVerticeDestino).orElseThrow();
-
+        
         verticesVisitados.add(verticeOrigem);
         Vertice atual = verticeOrigem;
-
+        
         while (!atual.equals(verticeDestino)) {
             Vertice verticeAlvo = atual;
-
+            
             // Otimização: Pegamos direto os vizinhos sem iterar sobre arestas do grafo
             // inteiro
             List<Vertice> adjacencias = verticeAlvo.getAdjacencias();
@@ -350,7 +350,7 @@ public class Grafo {
                 System.out.println("Caminho não encontrado. Busca falhou em: " + atual.getNome());
                 return null;
             }
-
+            
             // Busca a aresta não percorrida com o menor peso baseada nos vizinhos do
             // vértice atual
             List<Aresta> arestasVizinhas = new ArrayList<>();
@@ -359,49 +359,153 @@ public class Grafo {
                     arestasVizinhas.addAll(obtemArestasParaVizinho(verticeAlvo, vizinho));
                 }
             }
-
+            
             // Se não houver arestas vizinhas, significa que não há caminho para o destino
             if (arestasVizinhas.isEmpty()) {
                 System.out.println("Caminho não encontrado. Busca falhou em: " + atual.getNome());
                 return null;
             }
-
+            
             // Pega a aresta com o menor peso
             Aresta melhorAresta = arestasVizinhas.stream()
                     .min(Comparator.comparing(Aresta::getPeso))
                     .orElseThrow();
-
+            
             comprimentoCaminho += melhorAresta.getPeso() != null ? melhorAresta.getPeso() : 0;
             atual = obtemVerticeOposto(melhorAresta, verticeAlvo);
             verticesVisitados.add(atual);
-
+            
             System.out.println("Percorrendo aresta " + melhorAresta.getNome() +
                     " (peso " + melhorAresta.getPeso() +
                     ") para o vértice " + atual.getNome());
         }
-
+        
         List<String> nomesVisitados = verticesVisitados.stream().map(Vertice::getNome).toList();
-
+        
         System.out.println("Destino " + verticeDestino.getNome() + " encontrado! Busca concluída com sucesso.");
         System.out.println("Caminho: " + String.join(" -> ", nomesVisitados));
         System.out.println("Comprimento do caminho: " + comprimentoCaminho);
-
+        
         return nomesVisitados;
     }
-
-
+    
+    
     private List<Aresta> obtemArestasParaVizinho(Vertice atual, Vertice vizinho) {
         return arestas.stream()
                 .filter(a -> (a.getVerticeOrigem().equals(atual) && a.getVerticeDestino().equals(vizinho)) ||
                         (!eDirigido && a.getVerticeDestino().equals(atual) && a.getVerticeOrigem().equals(vizinho)))
                 .toList();
     }
-
+    
     private Vertice obtemVerticeOposto(Aresta aresta, Vertice vertice) {
         return aresta.getVerticeOrigem().equals(vertice) ? aresta.getVerticeDestino() : aresta.getVerticeOrigem();
     }
-
-
+    
+    // ===================================================================================
+    // LINKEDIN ANALYZER
+    // ===================================================================================
+    
+    /**
+     * Getter para a lista de vértices do grafo. Necessário para que o
+     * LinkedInAnalyzer consiga enumerar todos os usuários da rede (ex.: Missão 5,
+     * mapeamento de sub-redes isoladas), já que antes não havia forma pública de
+     * acessar essa lista.
+     */
+    public List<Vertice> getVertices() {
+        return vertices;
+    }
+    
+    /**
+     * Estrutura de retorno simples para o resultado do Dijkstra: o caminho
+     * (sequência de nomes) e o custo total (soma dos pesos) percorrido até o
+     * destino. Se o destino for inalcançável, caminho vem vazio e custoTotal = -1.
+     */
+    public record ResultadoCaminhoPonderado(List<String> caminho, int custoTotal) {
+    }
+    
+    /**
+     * Par (vértice, distância) usado apenas internamente pela fila de prioridade
+     * do Dijkstra. A distância aqui é uma "foto" do momento em que o vértice foi
+     * colocado na fila — isso é o que garante que o heap da PriorityQueue nunca
+     * fique inconsistente, mesmo quando descobrimos depois um caminho mais barato
+     * para o mesmo vértice (nesse caso, simplesmente inserimos um novo NoComDistancia
+     * e ignoramos, na hora de processar, qualquer vértice que já tenha sido
+     * finalizado antes).
+     */
+    private record NoComDistancia(Vertice vertice, int distancia) {
+    }
+    
+    /**
+     * Algoritmo de Dijkstra: encontra o caminho de menor soma de pesos entre
+     * origem e destino em um grafo ponderado com pesos não-negativos (que é
+     * exatamente o caso da rede social, onde peso = "distância" de afinidade).
+     */
+    public ResultadoCaminhoPonderado encontraRotaDeMaiorAfinidade(String nomeOrigem, String nomeDestino) {
+        Vertice origem = encontraVertice(nomeOrigem).orElseThrow(
+                () -> new IllegalArgumentException("Vertice " + nomeOrigem + " não encontrado."));
+        Vertice destino = encontraVertice(nomeDestino).orElseThrow(
+                () -> new IllegalArgumentException("Vertice " + nomeDestino + " não encontrado."));
+        
+        Map<Vertice, Integer> menorDistanciaConhecida = new HashMap<>();
+        Map<Vertice, Vertice> predecessorNoCaminho = new HashMap<>();
+        Set<Vertice> verticesFinalizados = new HashSet<>();
+        
+        for (Vertice v : vertices) {
+            menorDistanciaConhecida.put(v, Integer.MAX_VALUE);
+        }
+        menorDistanciaConhecida.put(origem, 0);
+        
+        PriorityQueue<NoComDistancia> filaDePrioridade =
+                new PriorityQueue<>(Comparator.comparingInt(NoComDistancia::distancia));
+        filaDePrioridade.add(new NoComDistancia(origem, 0));
+        
+        while (!filaDePrioridade.isEmpty()) {
+            Vertice atual = filaDePrioridade.poll().vertice();
+            
+            if (verticesFinalizados.contains(atual)) {
+                continue; // entrada desatualizada da fila (distância antiga), ignora
+            }
+            verticesFinalizados.add(atual);
+            
+            if (atual.equals(destino)) {
+                break;
+            }
+            
+            for (Vertice vizinho : atual.getAdjacencias()) {
+                if (verticesFinalizados.contains(vizinho)) {
+                    continue;
+                }
+                
+                List<Aresta> arestasParaVizinho = obtemArestasParaVizinho(atual, vizinho);
+                if (arestasParaVizinho.isEmpty()) {
+                    continue;
+                }
+                
+                int pesoDaConexao = arestasParaVizinho.get(0).getPeso();
+                int distanciaPeloAtual = menorDistanciaConhecida.get(atual) + pesoDaConexao;
+                
+                if (distanciaPeloAtual < menorDistanciaConhecida.get(vizinho)) {
+                    menorDistanciaConhecida.put(vizinho, distanciaPeloAtual);
+                    predecessorNoCaminho.put(vizinho, atual);
+                    filaDePrioridade.add(new NoComDistancia(vizinho, distanciaPeloAtual));
+                }
+            }
+        }
+        
+        if (menorDistanciaConhecida.get(destino) == Integer.MAX_VALUE) {
+            return new ResultadoCaminhoPonderado(new ArrayList<>(), -1);
+        }
+        
+        List<String> caminho = new ArrayList<>();
+        Vertice passoAtual = destino;
+        while (passoAtual != null) {
+            caminho.add(0, passoAtual.getNome());
+            passoAtual = predecessorNoCaminho.get(passoAtual);
+        }
+        
+        return new ResultadoCaminhoPonderado(caminho, menorDistanciaConhecida.get(destino));
+    }
+    
     @Override
     public String toString() {
         return """
